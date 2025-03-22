@@ -26,5 +26,32 @@
     integrity="sha512-v2e0S3.../E5kQ==" crossorigin="">
   </script>
   <script src="script.js"></script>
+
+
+  <!-- Firebase App (Core SDK) -->
+<script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js"></script>
+
+<!-- Firebase Firestore (for real-time database usage, see below for Realtime DB) -->
+<script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-firestore.js"></script>
+
+<!-- If you decide to use Firebase Auth or other services, include those scripts too -->
+
+<script>
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+  apiKey: "AIzaSyBlCB63IOwJQycSvRXUBjXxUnGIl-l6nQU",
+  authDomain: "yxdb-bec7c.firebaseapp.com",
+  projectId: "yxdb-bec7c",
+  storageBucket: "yxdb-bec7c.firebasestorage.app",
+  messagingSenderId: "436096196052",
+  appId: "1:436096196052:web:437ee07acfc2079b390a41"
+};
+
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+
+  // Initialize Firestore
+  const db = firebase.firestore();
+</script>
 </body>
 </html>

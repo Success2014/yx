@@ -1,76 +1,95 @@
-/**********************************************
- * 1. Handle the User Name Prompt
- **********************************************/
-
-// Grab references to the name prompt elements
+// 1) Prompt for user name or retrieve from localStorage
 const namePromptDiv = document.getElementById('name-prompt');
 const userNameInput = document.getElementById('userName');
 const saveNameBtn = document.getElementById('saveName');
-
-// Check if there's a saved name in local storage
 let savedName = localStorage.getItem('yxUserName');
 
 if (savedName) {
-  // If a name is already saved, hide the prompt
   namePromptDiv.style.display = 'none';
 } else {
-  // Otherwise, show the prompt
   namePromptDiv.style.display = 'flex';
 }
 
-// When the user clicks "Save Name"
 saveNameBtn.addEventListener('click', () => {
   const enteredName = userNameInput.value.trim();
   if (enteredName) {
     localStorage.setItem('yxUserName', enteredName);
-    // Hide the prompt
+    savedName = enteredName;
     namePromptDiv.style.display = 'none';
   } else {
     alert('Please enter a name.');
   }
 });
 
-/**********************************************
- * 2. Fetch User's Location via HTTPS
- *    (Using ipapi.co for IP-based geolocation)
- **********************************************/
-fetch('https://ipapi.co/json/')  
-  .then(response => response.json())
-  .then(data => {
-    // ipapi.co returns latitude and longitude fields
-    const lat = data.latitude;
-    const lon = data.longitude;
-
-    // If the fields are missing or undefined, we can use defaults
-    // But typically ipapi.co does return them correctly
-    if (lat === undefined || lon === undefined) {
-      console.error('Could not find lat/lon in ipapi.co response.', data);
-      // Fall back to a default location if needed
-      initMap(0, 0);
-    } else {
-      initMap(lat, lon);
-    }
-  })
-  .catch(error => {
-    console.error('Error retrieving IP location:', error);
-    // Fall back to a default location if needed
-    initMap(0, 0);
-  });
-
-/**********************************************
- * 3. Initialize Leaflet Map
- **********************************************/
+// 2) Initialize the map (once the user has a name)
+let map;
 function initMap(lat, lon) {
-  // Create the map centered on the user's location
-  const map = L.map('map').setView([lat, lon], 10);
+  if (!map) {
+    map = L.map('map').setView([lat, lon], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+  }
 
-  // Add the OpenStreetMap tile layer
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap'
-  }).addTo(map);
-
-  // Place a marker at the user's location
+  // Place a marker for the current user (optional)
   L.marker([lat, lon]).addTo(map)
     .bindPopup("You're here!")
     .openPopup();
+}
+
+// 3) Get location via IP or GPS
+// For example, using ipapi.co:
+function getLocationAndStore() {
+  fetch('https://ipapi.co/json/')
+    .then(res => res.json())
+    .then(data => {
+      const lat = data.latitude;
+      const lon = data.longitude;
+
+      initMap(lat, lon);
+
+      // 4) Save to Firestore
+      if (savedName) {
+        db.collection('locations').doc(savedName).set({
+          name: savedName,
+          lat: lat,
+          lon: lon,
+          updatedAt: new Date().toISOString()
+        });
+      }
+    })
+    .catch(err => console.error(err));
+}
+
+// 5) Listen to the 'locations' collection for changes
+let markers = [];  // keep track of markers so we can remove them
+function removeAllMarkers() {
+  markers.forEach(m => {
+    map.removeLayer(m);
+  });
+  markers = [];
+}
+
+db.collection('locations').onSnapshot(snapshot => {
+  // Clear existing markers
+  removeAllMarkers();
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const newMarker = L.marker([data.lat, data.lon]).addTo(map)
+      .bindPopup(`Name: ${data.name}`);
+    markers.push(newMarker);
+  });
+});
+
+// 6) Once we have a user name, call getLocationAndStore()
+if (savedName) {
+  getLocationAndStore();
+} else {
+  // Listen for the Save Name button
+  saveNameBtn.addEventListener('click', () => {
+    if (userNameInput.value.trim()) {
+      getLocationAndStore();
+    }
+  });
 }
