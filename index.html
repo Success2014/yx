@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8" />
-  <title>YX</title>
-  <!-- Leaflet CSS -->
-  <link 
-    rel="stylesheet" 
-    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
-    integrity="sha512-sA+78+...Cg==" crossorigin=""/>
-  <link rel="stylesheet" href="styles.css" />
+  <title>YX with Firebase</title>
+  <!-- Remove or fix the integrity attribute if it's causing errors -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
 </head>
 <body>
 
@@ -18,40 +14,33 @@
     <button id="saveName">Save Name</button>
   </div>
 
-  <div id="map"></div>
+  <div id="map" style="width: 100%; height: 500px;"></div>
 
-  <!-- Leaflet JS -->
-  <script 
-    src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
-    integrity="sha512-v2e0S3.../E5kQ==" crossorigin="">
+  <!-- Load Leaflet JS (no integrity for simplicity) -->
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+  <!-- Firebase COMPAT Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-firestore-compat.js"></script>
+
+  <!-- Initialize Firebase BEFORE your script.js -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "...",
+      authDomain: "yxdb-bec7c.firebaseapp.com",
+      projectId: "yxdb-bec7c",
+      storageBucket: "yxdb-bec7c.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdefg123456"
+    };
+    // Using compat method:
+    firebase.initializeApp(firebaseConfig);
+    // Now you have a global "firebase" object
+    const db = firebase.firestore();
   </script>
+
+  <!-- Finally, your custom script that references "db" -->
   <script src="script.js"></script>
 
-
-  <!-- Firebase App (Core SDK) -->
-<script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js"></script>
-
-<!-- Firebase Firestore (for real-time database usage, see below for Realtime DB) -->
-<script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-firestore.js"></script>
-
-<!-- If you decide to use Firebase Auth or other services, include those scripts too -->
-
-<script>
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-  apiKey: "AIzaSyBlCB63IOwJQycSvRXUBjXxUnGIl-l6nQU",
-  authDomain: "yxdb-bec7c.firebaseapp.com",
-  projectId: "yxdb-bec7c",
-  storageBucket: "yxdb-bec7c.firebasestorage.app",
-  messagingSenderId: "436096196052",
-  appId: "1:436096196052:web:437ee07acfc2079b390a41"
-};
-
-  // Initialize Firebase
-  const app = firebase.initializeApp(firebaseConfig);
-
-  // Initialize Firestore
-  const db = firebase.firestore();
-</script>
 </body>
 </html>
